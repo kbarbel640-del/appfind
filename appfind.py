@@ -65,7 +65,7 @@ def apkmirror_versions(base_path):
                 "version": ver,
                 "date": "",
                 "size": 0,
-                "url": "https://www.apkmirror.com/" + link + "/",
+                "url": "https://www.apkmirror.com" + link + "/",
                 "source": "APKMirror",
                 "_keys": keys,
             }
