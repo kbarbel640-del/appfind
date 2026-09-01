@@ -19,7 +19,18 @@ Package gewählt ──► Versionssammler
 - **Breite Abdeckung**: Play ist stark beim *Finden* von Packages; APKMirror bestätigt aktuelle Builds.
 - **Tiefes Archiv**: Aptoide reicht oft Jahre weiter zurück als APKMirror oder APKPure (z. B. WhatsApp bis **2.17.253 / 2017**), inkl. MD5 + Pool-Download-Pfad je Version.
 
-Dieses Repo ist Phase 1–2: **Name → Package → Versionskarte**. Downloads mit Hash-Prüfung sind bewusst der nächste Schritt, noch nicht eingebaut.
+Dieses Repo ist Phase 1–2: **Name → Package → Versionskarte**. Eingebaute Downloads (`--get`) sind **nicht geplant** — Versionslinks und Hashes reichen; APKs holst du woanders.
+
+## Install
+
+```bash
+git clone https://github.com/kbarbel640-del/appfind.git
+cd appfind
+bash install.sh
+source .venv/bin/activate
+```
+
+`install.sh` legt `.venv` an und installiert `requirements.txt`. Der erste F-Droid-Index-Sync läuft beim ersten `resolver.py`-Aufruf, nicht im Installer. Schon im Clone? Einfach `bash install.sh` (Git-URL als `$1` nur, wenn das Skript für dich klonen soll).
 
 ## Aufbau
 
@@ -35,11 +46,6 @@ Dieses Repo ist Phase 1–2: **Name → Package → Versionskarte**. Downloads m
 ## Schnellstart
 
 ```bash
-git clone https://github.com/kbarbel640-del/appfind.git
-cd appfind
-bash install.sh
-source .venv/bin/activate
-
 # Name → Package-Kandidaten (Quellen als Badges, nach Package gemerged)
 python3 resolver.py "signal"
 python3 resolver.py --json "firefox"
@@ -71,7 +77,7 @@ F-Droid und APKMirror ergänzen sich: F-Droid für echte FOSS-Historie, APKMirro
 ### Play (`play.py`)
 `google-play-scraper`’s `search()` liefert gegen aktuelles Markup oft `appId: None`. Deshalb:
 
-- **Suche** mit eigenem HTML-Parser auf `play.google.com/store/search` (`details?id=` + Title/Developer/Icon).
+- **Suche** zieht Package-IDs aus dem Roh-HTML (`details?id=` / escaped); Title fällt auf den Package-Namen zurück, wenn nichts Stabiles da ist.
 - **Details** weiter über die funktionierende `app(pkg)`-API des Scrapers (venv-Subprocess, falls vorhanden).
 
 ### F-Droid (`fdroid.py`)
@@ -82,7 +88,7 @@ F-Droid und APKMirror ergänzen sich: F-Droid für echte FOSS-Historie, APKMirro
 ### APKMirror (`apkmirror.py`)
 - Package kommt vom „View on Play Store“-Link, nicht aus dem Titel.
 - Token-Namensfilter nur bei **Namenssuche** (sonst Homepage-Müll). `by_package()` matcht exakt.
-- 403s werden in `exact_by_package()` abgefangen, Play/F-Droid können weiter treffen.
+- HTTP wird im Prozess gedrosselt (≥1.8s); 403 einmal Retry, danach kann `exact_by_package()` auf Play/F-Droid fallen.
 - App-Seiten zeigen grob die neuesten ~10 Releases — keine zentrale Pagination für Altes.
 
 ### Aptoide (`aptoide.py`) — der Archiv-Treffer
@@ -95,13 +101,13 @@ F-Droid und APKMirror ergänzen sich: F-Droid für echte FOSS-Historie, APKMirro
 
 - APKMirror-Althistorie über einzelne Release-/Varianten-Seiten
 - Play „aktuell“ als eigene Abgleichszeile
-- Echte Downloads mit MD5/SHA-Prüfung (F-Droid-URLs, Aptoide-Pool, optional apkeep/APKPure)
+- **Nicht geplant:** eingebauter APK-Download / `--get` — Links (+ Hashes, wo vorhanden) reichen
 - **Nicht geplant als fünfte Namensquelle:** Uptodown — die JSON-Storeliste bleibt Landkarte, kein Crawler-Futter
 
-## Status
+## License
 
-Research-/Tooling-Code in aktiver Entwicklung. Store-Markup ändert sich — Adapter können brechen. Issues und PRs willkommen.
+Unlicense. Mach damit, was du willst. Keine Garantie.
+Adapter brechen, wenn Store-Markup oder inoffizielle APIs sich ändern.
 
 ---
 **🤖 Grok-approved.** *(Danke, [xAI](https://x.ai)!)*
-
