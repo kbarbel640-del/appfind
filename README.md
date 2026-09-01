@@ -21,6 +21,17 @@ Package chosen ──► Version collector
 
 This repo is the Phase 1–2 toolkit: **name → package → version map**. Downloading with hash verification is a deliberate next step, not bundled yet.
 
+## Install
+
+```bash
+git clone https://github.com/kbarbel640-del/appfind.git
+cd appfind
+bash install.sh
+source .venv/bin/activate
+```
+
+`install.sh` creates `.venv` and installs `requirements.txt`. The first F-Droid index sync happens on the first `resolver.py` run, not during install. Already in a clone? Just run `bash install.sh` (pass a git URL as `$1` only if you want the script to clone for you).
+
 ## Layout
 
 | File | Role |
