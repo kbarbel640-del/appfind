@@ -167,7 +167,8 @@ def versions(pkg):
             continue
         for ent in entry.get("versions", {}).values():
             man = ent.get("manifest", {})
-            fname = ent.get("file", {}).get("name", "")
+            fobj = ent.get("file", {}) or {}
+            fname = fobj.get("name", "")
             if repo == "IzzyOnDroid":
                 base = "https://apt.izzysoft.de/fdroid/repo"
             else:
@@ -176,8 +177,9 @@ def versions(pkg):
                 "version": man.get("versionName", ""),
                 "vercode": man.get("versionCode"),
                 "date": datetime.fromtimestamp(ent.get("added", 0) / 1000, tz=timezone.utc).strftime("%Y-%m-%d"),
-                "size": ent.get("file", {}).get("size", 0),
+                "size": fobj.get("size", 0),
                 "url": base + fname,
+                "sha256": fobj.get("sha256", "") or "",
                 "source": repo,
             })
     rows.sort(key=lambda r: (r["vercode"] or -1), reverse=True)

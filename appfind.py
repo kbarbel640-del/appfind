@@ -140,8 +140,13 @@ def render(g):
         out.append(f"\n{name_field} ({len(rows)} Versionen):")
         for r in rows:
             size = f"{r['size']/1e6:.1f} MB" if r.get("size") else ""
+            extra = ""
+            if r.get("sha256"):
+                extra += f" sha256={r['sha256']}"
+            if r.get("md5"):
+                extra += f" md5={r['md5']}"
             out.append(f"  {r['version'].ljust(16)} vc={str(r['vercode']).ljust(10) if r.get('vercode') else '-'.ljust(10)}"
-                       f" {r.get('date','').ljust(10)} {size.ljust(9)} [{r['source']}] {r.get('url','')}")
+                       f" {r.get('date','').ljust(10)} {size.ljust(9)} [{r['source']}] {r.get('url','')}{extra}")
     return "\n".join(out)
 
 
