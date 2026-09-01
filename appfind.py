@@ -7,15 +7,11 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import requests
-
+import apkmirror
 import fdroid
 import resolver
 import aptoide
 
-UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128.0"}
-S = requests.Session()
-S.headers.update(UA)
 CACHE = Path(__file__).resolve().parent / "cache" / "apkmirror"
 API_TTL = 6 * 3600
 HERE = Path(__file__).resolve().parent
@@ -27,8 +23,7 @@ def _html(url):
     raw = CACHE / key
     if raw.exists() and time.time() - raw.stat().st_mtime < API_TTL:
         return raw.read_text()
-    r = S.get(url, timeout=60)
-    r.raise_for_status()
+    r = apkmirror._get(url)
     raw.write_text(r.text)
     return r.text
 

@@ -1,5 +1,7 @@
 import html
 import re
+import threading
+import time
 
 import requests
 
@@ -13,11 +15,30 @@ APPROW_RE = re.compile(r'<div class="appRow">(.*?)(?=<div class="appRow">|\Z)', 
 APP_LINK_RE = re.compile(r'href="(/apk/[^"]+?/)"')
 NAME_RE = re.compile(r'<h5[^>]*class="[^"]*app[^"]*"[^>]*>(.*?)</h5>', re.S)
 
+_LOCK = threading.Lock()
+_LAST_TS = 0.0
+_MIN_INTERVAL = 1.8
+
+
+def _get(url):
+    """Throttled GET: ≥1.8s between Mirror requests; one 20s retry on 403."""
+    global _LAST_TS
+    with _LOCK:
+        wait = _MIN_INTERVAL - (time.time() - _LAST_TS)
+        if wait > 0:
+            time.sleep(wait)
+        r = S.get(url, timeout=60)
+        _LAST_TS = time.time()
+        if r.status_code == 403:
+            time.sleep(20)
+            r = S.get(url, timeout=60)
+            _LAST_TS = time.time()
+        r.raise_for_status()
+        return r
+
 
 def _page(url):
-    r = S.get(url, timeout=60)
-    r.raise_for_status()
-    return r.text
+    return _get(url).text
 
 
 def _clean(s):
