@@ -1,4 +1,5 @@
 import html
+import os
 import re
 import threading
 import time
@@ -17,11 +18,14 @@ NAME_RE = re.compile(r'<h5[^>]*class="[^"]*app[^"]*"[^>]*>(.*?)</h5>', re.S)
 
 _LOCK = threading.Lock()
 _LAST_TS = 0.0
-_MIN_INTERVAL = 1.8
+try:
+    _MIN_INTERVAL = float(os.environ.get("APKMIRROR_DELAY_SEC", "1.8"))
+except ValueError:
+    _MIN_INTERVAL = 1.8
 
 
 def _get(url):
-    """Throttled GET: ≥1.8s between Mirror requests; one 20s retry on 403."""
+    """Throttled GET: ≥APKMIRROR_DELAY_SEC (default 1.8) between Mirror requests; one 20s retry on 403."""
     global _LAST_TS
     with _LOCK:
         wait = _MIN_INTERVAL - (time.time() - _LAST_TS)
@@ -45,12 +49,13 @@ def _clean(s):
     return html.unescape(re.sub(r"<[^>]+>", "", s)).strip()
 
 
-def search(query, limit=10):
+def search(query, limit=3):
     return _search_landings(query, limit)
 
 
 def by_package(pkg):
     return _search_landings(pkg, limit=10, want_pkg=pkg)
+
 
 
 def _search_landings(query, limit=10, want_pkg=None):
