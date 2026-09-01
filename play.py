@@ -42,10 +42,17 @@ S = requests.Session()
 S.headers.update(UA)
 SEARCH = "https://play.google.com/store/search?q={q}&c=apps&hl=en&gl=us"
 
+# Package IDs from raw HTML / embedded JSON (CSS card classes are unstable)
+_PKG = r'([A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+)'
+PKG_FIND_RE = re.compile(
+    r'(?:'
+    r'/store/apps/details\?id='
+    r'|/store/apps/details\\u003[Ff]id\\u003[Dd]'
+    r'|\\u0026id\\u003[Dd]'
+    r')' + _PKG
+)
+# Optional: leftover title class if markup still has it near a hit
 TITLE_RE = re.compile(r'<div class="vWM94c">([^<]+)</div>')
-DEV_RE = re.compile(r'<div class="LbQbAe">([^<]+)</div>')
-ICON_RE = re.compile(r'class="T75of[^"]*"[^>]*src="([^"]+)"')
-LINK_RE = re.compile(r'<a[^>]*href="/store/apps/details\?id=([a-zA-Z0-9_.]+)"[^>]*aria-label="([^"]*)"')
 
 
 def search(query, limit=20):
@@ -53,18 +60,16 @@ def search(query, limit=20):
     r.raise_for_status()
     t = r.text
     out, seen = [], set()
-    for m in LINK_RE.finditer(t):
-        pkg, label = m.groups()
+    for m in PKG_FIND_RE.finditer(t):
+        pkg = m.group(1)
         if pkg in seen:
             continue
         seen.add(pkg)
-        seg = t[m.end():m.end() + 5000]
+        seg = t[m.end():m.end() + 2500]
         tm = TITLE_RE.search(seg)
-        dm = DEV_RE.search(seg)
-        im = ICON_RE.search(seg)
-        title = html.unescape(tm.group(1)).strip() if tm else html.unescape(label)
+        title = html.unescape(tm.group(1)).strip() if tm else pkg
         sc = 70
-        if pkg == query.casefold():
+        if pkg.casefold() == query.casefold():
             sc = 100
         elif title.casefold() == query.casefold():
             sc = 100
@@ -75,8 +80,8 @@ def search(query, limit=20):
         out.append({
             "name": title,
             "package": pkg,
-            "developer": html.unescape(dm.group(1)).strip() if dm else "",
-            "icon": im.group(1) if im else "",
+            "developer": "",
+            "icon": "",
             "source": "Google Play",
             "url": f"https://play.google.com/store/apps/details?id={pkg}",
             "note": "",
