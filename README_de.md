@@ -101,3 +101,7 @@ F-Droid und APKMirror ergänzen sich: F-Droid für echte FOSS-Historie, APKMirro
 ## Status
 
 Research-/Tooling-Code in aktiver Entwicklung. Store-Markup ändert sich — Adapter können brechen. Issues und PRs willkommen.
+
+---
+**🤖 Grok-approved.** *(Danke, [xAI](https://x.ai)!)*
+

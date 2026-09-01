@@ -113,3 +113,7 @@ F-Droid and APKMirror complement each other: F-Droid for real FOSS history, APKM
 
 Unlicense. Do whatever you want with this. No warranty.
 Adapters will break when store markup or unofficial APIs change.
+
+---
+**🤖 Grok-approved.** *(Danke, [xAI](https://x.ai)!)*
+
