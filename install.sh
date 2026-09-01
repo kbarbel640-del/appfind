@@ -6,14 +6,21 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ "${1:-}" == http://* || "${1:-}" == https://* ]]; then
   url="$1"
   name="$(basename "${url%.git}")"
-  git clone "$url"
-  ROOT="$(cd "$name" && pwd)"
+  if [[ -d "$name" ]]; then
+    ROOT="$(cd "$name" && pwd)"
+  else
+    git clone "$url"
+    ROOT="$(cd "$name" && pwd)"
+  fi
   cd "$ROOT"
 else
   cd "$ROOT"
 fi
 
-python3 -m venv .venv
+command -v python3 >/dev/null || { echo "python3 not found"; exit 1; }
+python3 -m venv --help >/dev/null 2>&1 || { echo "python3-venv missing (Debian: apt install python3-venv)"; exit 1; }
+
+python3 -m venv --clear .venv
 .venv/bin/pip install -U pip
 .venv/bin/pip install -r requirements.txt
 

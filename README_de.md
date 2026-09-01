@@ -35,6 +35,11 @@ Dieses Repo ist Phase 1–2: **Name → Package → Versionskarte**. Downloads m
 ## Schnellstart
 
 ```bash
+git clone https://github.com/kbarbel640-del/appfind.git
+cd appfind
+bash install.sh
+source .venv/bin/activate
+
 # Name → Package-Kandidaten (Quellen als Badges, nach Package gemerged)
 python3 resolver.py "signal"
 python3 resolver.py --json "firefox"

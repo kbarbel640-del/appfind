@@ -46,6 +46,11 @@ source .venv/bin/activate
 ## Quick start
 
 ```bash
+git clone https://github.com/kbarbel640-del/appfind.git
+cd appfind
+bash install.sh
+source .venv/bin/activate
+
 # Name → package candidates (source badges, merged by package)
 python3 resolver.py "signal"
 python3 resolver.py --json "firefox"
