@@ -93,6 +93,7 @@ F-Droid and APKMirror complement each other: F-Droid for real FOSS history, APKM
 - Actual downloads with MD5/SHA verification (F-Droid URLs, Aptoide pool, optional apkeep/APKPure)
 - **Not planned as a fifth name source:** Uptodown — the JSON store list stays a map, not crawler feed
 
-## License / status
+## License
 
-Research / tooling code under active development. Expect adapter breakage when stores change markup; PRs and issue reports welcome.
+Unlicense. Do whatever you want with this. No warranty.
+Adapters will break when store markup or unofficial APIs change.
