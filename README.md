@@ -55,6 +55,7 @@ python3 resolver.py --sync "signal"      # refresh F-Droid indexes
 # Package (or name) → version lists
 python3 appfind.py org.mozilla.firefox --versions
 python3 appfind.py "antennapod" --versions
+python3 appfind.py com.unearby.sayhi --versions --no-apkmirror --no-play  # skip sources; still lists Aptoide/F-Droid
 python3 appfind.py "firefox" --versions --pick 3   # pick candidate rank (default: 1)
 python3 appfind.py org.mozilla.firefox --versions --json
 ```

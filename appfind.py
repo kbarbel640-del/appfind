@@ -98,22 +98,29 @@ def is_package(s):
     return bool(re.match(r"^[a-zA-Z0-9][a-zA-Z0-9_.]*\.[a-zA-Z0-9_.]+$", s))
 
 
-def gather(pkg):
-    cands, _ = resolver.exact_by_package(pkg)
-    c = next((x for x in cands if x["package"] == pkg), cands[0] if cands else None)
-    urls = (c.get("urls") or []) if c else []
-    fdv = fdroid.versions(pkg)
+def gather(pkg, sources=None):
+    sources = sources if sources is not None else {
+        "play": True, "fdroid": True, "apkmirror": True, "aptoide": True,
+    }
+    c = None
+    urls = []
+    if sources["apkmirror"]:
+        cands, _ = resolver.exact_by_package(pkg)
+        c = next((x for x in cands if x["package"] == pkg), cands[0] if cands else None)
+        urls = (c.get("urls") or []) if c else []
+    fdv = fdroid.versions(pkg) if sources["fdroid"] else []
     am = []
     am_url = next((u for u in urls if "apkmirror.com" in u), None)
     if am_url:
         base = re.sub(r"^https?://www\.apkmirror\.com", "", am_url).rstrip("/") + "/"
         am = apkmirror_versions(base)
-    pc = play_current(pkg)
+    pc = play_current(pkg) if sources["play"] else None
     ap_versions = []
-    try:
-        ap_versions = aptoide.versions(pkg, resolve_dl=True)
-    except Exception:
-        pass
+    if sources["aptoide"]:
+        try:
+            ap_versions = aptoide.versions(pkg, resolve_dl=True)
+        except Exception:
+            pass
     return {
         "package": pkg,
         "name": c.get("primary") if c else pkg,
@@ -170,6 +177,9 @@ def main():
     ap.add_argument("--versions", action="store_true")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--no-play", action="store_true")
+    ap.add_argument("--no-apkmirror", action="store_true")
+    ap.add_argument("--no-aptoide", action="store_true")
+    ap.add_argument("--no-fdroid", action="store_true")
     ap.add_argument("--pick", type=int, default=1, help="Kandidat waehlen (1=Rank 1, interaktiv wenn 0 lenken)")
     ap.add_argument("--limit", type=int, default=200)
     a = ap.parse_args()
@@ -189,13 +199,16 @@ def main():
             else:
                 pick = max(0, min(a.pick, len(candidates)) - 1)
                 pkg = candidates[pick]["package"]
-    g = gather(pkg)
+    g = gather(pkg, {
+        "play": not a.no_play,
+        "fdroid": not a.no_fdroid,
+        "apkmirror": not a.no_apkmirror,
+        "aptoide": not a.no_aptoide,
+    })
     if a.limit:
         g["fdroid"] = g["fdroid"][: a.limit]
         g["apkmirror"] = g["apkmirror"][: a.limit]
         g["aptoide"] = g["aptoide"][: a.limit]
-    if a.no_play:
-        g["play"] = None
     if a.json:
         print(json.dumps(g, ensure_ascii=False, indent=2))
     else:
